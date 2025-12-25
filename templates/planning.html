@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Planning Hebdomadaire - AI FitChef</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background: #fef8f3; min-height: 100vh; }
+        
+        .planning-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, #e0f2fe 0%, #fef3c7 100%);
+            border-radius: 30px;
+            padding: 50px;
+            margin-bottom: 40px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+        }
+        .hero-section h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #1a1a1a;
+            margin-bottom: 15px;
+        }
+        .hero-section p {
+            font-size: 1.2rem;
+            color: #666;
+        }
+        
+        .generate-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .generate-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 20px 50px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
+            transition: all 0.3s ease;
+        }
+        .generate-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(16, 185, 129, 0.5);
+        }
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        .loading.active { display: block; }
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #10b981;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .planning-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .day-card {
+            background: white;
+            border-radius: 25px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .day-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+        .day-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #10b981;
+        }
+        .day-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            display: block;
+        }
+        .day-total {
+            color: #10b981;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #e5e7eb;
+        }
+        
+        .meal-item {
+            margin-bottom: 15px;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border-left: 4px solid #10b981;
+        }
+        .meal-time {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #10b981;
+            font-weight: 700;
+            font-size: 0.75rem;
+            margin-bottom: 6px;
+        }
+        .meal-name {
+            color: #1a1a1a;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+        .meal-desc {
+            color: #666;
+            font-size: 0.8rem;
+            margin-bottom: 4px;
+        }
+        .meal-cal {
+            color: #10b981;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .water-reminder {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border-left-color: #3b82f6;
+        }
+        .water-reminder .meal-time {
+            color: #3b82f6;
+        }
+        
+        @media (max-width: 1024px) {
+            .planning-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 768px) {
+            .planning-grid {
+                grid-template-columns: 1fr;
+            }
+            .hero-section h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand"><i class="fas fa-leaf"></i> AI FitChef</a>
+            <ul class="navbar-menu">
+                <li class="navbar-item"><a href="/" class="navbar-link"><i class="fas fa-home"></i> Accueil</a></li>
+                <li class="navbar-item"><a href="/profile" class="navbar-link"><i class="fas fa-user"></i> Mon Profil</a></li>
+                <li class="navbar-item"><a href="/recettes" class="navbar-link"><i class="fas fa-utensils"></i> Recettes</a></li>
+                <li class="navbar-item"><a href="/planning" class="navbar-link active"><i class="fas fa-calendar-alt"></i> Planning</a></li>
+                <li class="navbar-item"><a href="/motivation" class="navbar-link"><i class="fas fa-fire"></i> Motivation</a></li>
+                <li class="navbar-item"><a href="/frigo" class="navbar-link"><i class="fas fa-camera"></i> Mon Frigo</a></li>
+                <li class="navbar-item"><a href="/contact" class="navbar-link"><i class="fas fa-envelope"></i> Contact</a></li>
+                <li class="navbar-item"><a href="/logout" class="navbar-link"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <div class="planning-container">
+        <div class="hero-section">
+            <h1>📅 Mon Planning Hebdomadaire</h1>
+            <p>Un menu complet adapté à ton objectif avec repas équilibrés</p>
+        </div>
+        
+        <div class="generate-section">
+            <button class="generate-btn" id="generate-planning">
+                <i class="fas fa-magic"></i>
+                Générer mon planning personnalisé
+            </button>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="color: #666; font-size: 1.1rem;">✨ L'IA crée ton planning...</p>
+        </div>
+        
+        <div class="planning-grid" id="planning-grid"></div>
+    </div>
+
+   <footer class="footer">
+    <div class="footer-content">
+        <div class="footer-socials">
+            <a href="https://www.linkedin.com/in/imane-haddag-06b0a433a" target="_blank" class="social-link" aria-label="LinkedIn Imane">
+                <i class="fab fa-linkedin"></i>
+            </a>
+            <a href="https://www.linkedin.com/in/sara-tamani-b0b540290" target="_blank" class="social-link" aria-label="LinkedIn Sara">
+                <i class="fab fa-linkedin"></i>
+            </a>
+            <a href="https://github.com" target="_blank" class="social-link" aria-label="GitHub">
+                <i class="fab fa-github"></i>
+            </a>
+        </div>
+
+        <div class="footer-links">
+            <a href="#" class="footer-link">Mentions Légales</a>
+            <a href="#" class="footer-link">Politique de confidentialité</a>
+            <a href="#" class="footer-link">CGU</a>
+            <a href="/contact" class="footer-link">Contact</a>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2024 AI FitChef - Imane HADDAG & Sara TAMANI. Tous droits réservés.</p>
+        </div>
+    </div>
+</footer>
+
+    <script>
+        function createDayCard(jour) {
+            return `
+                <div class="day-card">
+                    <div class="day-header">
+                        <span class="day-name">${jour.charAt(0).toUpperCase() + jour.slice(1)}</span>
+                    </div>
+                    
+                    <div class="meal-item">
+                        <div class="meal-time"><i class="fas fa-sun"></i> Petit-déjeuner</div>
+                        <div class="meal-name" id="${jour}-breakfast-title">...</div>
+                        <div class="meal-desc" id="${jour}-breakfast-desc">...</div>
+                        <div class="meal-cal" id="${jour}-breakfast-cal">...</div>
+                    </div>
+                    
+                    <div class="meal-item">
+                        <div class="meal-time"><i class="fas fa-apple-alt"></i> Snack matin</div>
+                        <div class="meal-name" id="${jour}-snack1-title">...</div>
+                        <div class="meal-desc" id="${jour}-snack1-desc">...</div>
+                        <div class="meal-cal" id="${jour}-snack1-cal">...</div>
+                    </div>
+                    
+                    <div class="meal-item">
+                        <div class="meal-time"><i class="fas fa-utensils"></i> Déjeuner</div>
+                        <div class="meal-name" id="${jour}-lunch-title">...</div>
+                        <div class="meal-desc" id="${jour}-lunch-desc">...</div>
+                        <div class="meal-cal" id="${jour}-lunch-cal">...</div>
+                    </div>
+                    
+                    <div class="meal-item water-reminder">
+                        <div class="meal-time"><i class="fas fa-tint"></i> 15h00</div>
+                        <div class="meal-name">💧 Boire 500ml d'eau</div>
+                    </div>
+                    
+                    <div class="meal-item">
+                        <div class="meal-time"><i class="fas fa-cookie"></i> Snack après-midi</div>
+                        <div class="meal-name" id="${jour}-snack2-title">...</div>
+                        <div class="meal-desc" id="${jour}-snack2-desc">...</div>
+                        <div class="meal-cal" id="${jour}-snack2-cal">...</div>
+                    </div>
+                    
+                    <div class="meal-item">
+                        <div class="meal-time"><i class="fas fa-moon"></i> Dîner</div>
+                        <div class="meal-name" id="${jour}-dinner-title">...</div>
+                        <div class="meal-desc" id="${jour}-dinner-desc">...</div>
+                        <div class="meal-cal" id="${jour}-dinner-cal">...</div>
+                    </div>
+                    
+                    <div class="meal-item water-reminder">
+                        <div class="meal-time"><i class="fas fa-tint"></i> 21h30</div>
+                        <div class="meal-name">💧 Dernière hydratation</div>
+                    </div>
+                    
+                    <div class="day-total" id="${jour}-total">Total : ... kcal</div>
+                </div>
+            `;
+        }
+
+        const jours = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+        const grid = document.getElementById('planning-grid');
+        jours.forEach(jour => {
+            grid.innerHTML += createDayCard(jour);
+        });
+
+        document.getElementById('generate-planning').addEventListener('click', async function() {
+            const btn = this;
+            const loading = document.getElementById('loading');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Génération...';
+            loading.classList.add('active');
+            
+            try {
+                const response = await fetch('/api/generate_planning', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.planning) {
+                    afficherPlanning(data.planning);
+                } else {
+                    alert('❌ Erreur: ' + (data.error || 'Erreur inconnue'));
+                }
+                
+            } catch (error) {
+                console.error('❌ Erreur:', error);
+                alert('Erreur de connexion au serveur');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-magic"></i> Régénérer';
+                loading.classList.remove('active');
+            }
+        });
+
+        function afficherPlanning(planning) {
+            jours.forEach(jour => {
+                const data = planning[jour];
+                if (!data) return;
+                
+                if (data.petit_dejeuner) {
+                    document.getElementById(`${jour}-breakfast-title`).textContent = data.petit_dejeuner.nom || '...';
+                    document.getElementById(`${jour}-breakfast-desc`).textContent = data.petit_dejeuner.description || '...';
+                    document.getElementById(`${jour}-breakfast-cal`).textContent = `⚡ ${data.petit_dejeuner.calories || 0} kcal`;
+                }
+                
+                if (data.snack_matin) {
+                    document.getElementById(`${jour}-snack1-title`).textContent = data.snack_matin.nom || '...';
+                    document.getElementById(`${jour}-snack1-desc`).textContent = data.snack_matin.description || '...';
+                    document.getElementById(`${jour}-snack1-cal`).textContent = `⚡ ${data.snack_matin.calories || 0} kcal`;
+                }
+                
+                if (data.dejeuner) {
+                    document.getElementById(`${jour}-lunch-title`).textContent = data.dejeuner.nom || '...';
+                    document.getElementById(`${jour}-lunch-desc`).textContent = data.dejeuner.description || '...';
+                    document.getElementById(`${jour}-lunch-cal`).textContent = `⚡ ${data.dejeuner.calories || 0} kcal`;
+                }
+                
+                if (data.snack_apres_midi) {
+                    document.getElementById(`${jour}-snack2-title`).textContent = data.snack_apres_midi.nom || '...';
+                    document.getElementById(`${jour}-snack2-desc`).textContent = data.snack_apres_midi.description || '...';
+                    document.getElementById(`${jour}-snack2-cal`).textContent = `⚡ ${data.snack_apres_midi.calories || 0} kcal`;
+                }
+                
+                if (data.diner) {
+                    document.getElementById(`${jour}-dinner-title`).textContent = data.diner.nom || '...';
+                    document.getElementById(`${jour}-dinner-desc`).textContent = data.diner.description || '...';
+                    document.getElementById(`${jour}-dinner-cal`).textContent = `⚡ ${data.diner.calories || 0} kcal`;
+                }
+                
+                const total = (data.petit_dejeuner?.calories || 0) + 
+                              (data.snack_matin?.calories || 0) + 
+                              (data.dejeuner?.calories || 0) + 
+                              (data.snack_apres_midi?.calories || 0) + 
+                              (data.diner?.calories || 0);
+                
+                document.getElementById(`${jour}-total`).textContent = `Total : ${total} kcal`;
+            });
+        }
+    </script>
+</body>
+</html>

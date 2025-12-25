@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recettes Recommandées - AI FitChef</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { display: flex; flex-direction: column; min-height: 100vh; background: #fef8f3; }
+        main { flex: 1; padding: 20px; }
+        .recettes-container { max-width: 1400px; margin: 0 auto; }
+        
+        .hero-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            background: linear-gradient(135deg, #e0f2fe 0%, #fef3c7 100%);
+            border-radius: 30px;
+            padding: 60px;
+            margin-bottom: 60px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+        }
+        .hero-text h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: #1a1a1a;
+            line-height: 1.1;
+            margin-bottom: 20px;
+        }
+        .hero-text p {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        .hero-stats {
+            display: flex;
+            gap: 40px;
+            margin-top: 30px;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #10b981;
+            display: block;
+        }
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        .hero-image {
+            position: relative;
+        }
+        .hero-image img {
+            width: 100%;
+            height: auto;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            object-fit: cover;
+        }
+        
+        .section-header {
+            margin-bottom: 40px;
+        }
+        .section-header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+        }
+        .section-header p {
+            font-size: 1.1rem;
+            color: #666;
+        }
+        
+        .recettes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+        .recette-card {
+            background: white;
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .recette-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        }
+        .recette-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        .recette-image-placeholder {
+            width: 100%;
+            height: 250px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .recette-image-placeholder::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+        }
+        .recette-content {
+            padding: 25px;
+        }
+        .recette-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+        }
+        .recette-meta {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        .recette-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .recette-description {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        .recette-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .tag {
+            background: #f0fdf4;
+            color: #059669;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .planning-suggestion {
+            text-align: center;
+            margin: 60px auto 40px;
+            padding: 50px 40px;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border-radius: 30px;
+            box-shadow: 0 15px 40px rgba(16, 185, 129, 0.15);
+            max-width: 900px;
+            position: relative;
+            overflow: hidden;
+        }
+        .planning-suggestion::before {
+            content: '📅';
+            position: absolute;
+            font-size: 200px;
+            opacity: 0.08;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .planning-suggestion h3 {
+            color: #059669;
+            font-size: 2rem;
+            margin-bottom: 15px;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+        .planning-suggestion p {
+            color: #555;
+            font-size: 1.15rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            position: relative;
+            z-index: 1;
+        }
+        .planning-suggestion strong {
+            color: #10b981;
+            font-weight: 700;
+        }
+        .planning-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 20px 45px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.15rem;
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.35);
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+        .planning-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(16, 185, 129, 0.45);
+        }
+        .planning-btn i {
+            font-size: 1.3rem;
+        }
+        
+        .actions-grid {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 40px;
+        }
+        .action-btn {
+            padding: 14px 30px;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .action-btn.primary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        .action-btn.primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+        }
+        .action-btn.secondary {
+            background: white;
+            color: #10b981;
+            border: 2px solid #10b981;
+        }
+        .action-btn.secondary:hover {
+            background: #f0fdf4;
+            transform: translateY(-3px);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 80px 40px;
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .empty-state h2 {
+            font-size: 2rem;
+            color: #1a1a1a;
+            margin-bottom: 15px;
+        }
+        
+        @media (max-width: 1024px) {
+            .hero-section {
+                grid-template-columns: 1fr;
+                padding: 40px;
+            }
+            .hero-text h1 {
+                font-size: 2.5rem;
+            }
+            .planning-suggestion {
+                padding: 40px 30px;
+            }
+        }
+        @media (max-width: 768px) {
+            .recettes-grid {
+                grid-template-columns: 1fr;
+            }
+            .hero-stats {
+                flex-direction: column;
+                gap: 20px;
+            }
+            .planning-suggestion h3 {
+                font-size: 1.6rem;
+            }
+            .planning-suggestion p {
+                font-size: 1rem;
+            }
+            .planning-btn {
+                padding: 16px 35px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+   <nav class="navbar">
+    <div class="navbar-container">
+        <a href="/" class="navbar-brand"><i class="fas fa-leaf"></i> AI FitChef</a>
+        <ul class="navbar-menu">
+            <li class="navbar-item"><a href="/" class="navbar-link"><i class="fas fa-home"></i> Accueil</a></li>
+            <li class="navbar-item"><a href="/profile" class="navbar-link"><i class="fas fa-user"></i> Mon Profil</a></li>
+            <li class="navbar-item"><a href="/recettes" class="navbar-link active"><i class="fas fa-utensils"></i> Recettes</a></li>
+            <li class="navbar-item"><a href="/planning" class="navbar-link"><i class="fas fa-calendar-alt"></i> Planning</a></li>
+            <li class="navbar-item"><a href="/motivation" class="navbar-link"><i class="fas fa-fire"></i> Motivation</a></li>
+            <li class="navbar-item"><a href="/frigo" class="navbar-link"><i class="fas fa-camera"></i> Mon Frigo</a></li>
+            <li class="navbar-item"><a href="/contact" class="navbar-link"><i class="fas fa-envelope"></i> Contact</a></li>
+            <li class="navbar-item"><a href="/logout" class="navbar-link"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+        </ul>
+    </div>
+</nav>
+    
+    <main>
+        <div class="recettes-container">
+            <div class="hero-section">
+                <div class="hero-text">
+                    <h1>Help You eat healthier</h1>
+                    <p>Découvrez des recettes saines et équilibrées, adaptées à vos objectifs et aux ingrédients que vous avez chez vous.</p>
+                    <div class="hero-stats">
+                        <div class="stat-item">
+                            <span class="stat-number">{{ recettes|length }}</span>
+                            <span class="stat-label">Recettes</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">15-40</span>
+                            <span class="stat-label">Min</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">4.8</span>
+                            <span class="stat-label">Rating</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&h=600&fit=crop" alt="Healthy Bowl">
+                </div>
+            </div>
+
+            <div class="section-header">
+                <h2>Recipe Recommendations</h2>
+                <p>Découvrez des recettes adaptées à vos objectifs, {{ username }} !</p>
+            </div>
+
+            {% if recettes %}
+            <div class="recettes-grid">
+                {% for r in recettes %}
+                <div class="recette-card" onclick="this.querySelector('.hidden-link').click()">
+                    {% if r.photo %}
+                        <img src="{{ r.photo }}" alt="{{ r.nom }}" class="recette-image">
+                    {% else %}
+                        <div class="recette-image-placeholder">🥗</div>
+                    {% endif %}
+                    
+                    <div class="recette-content">
+                        <h3 class="recette-title">{{ r.nom }}</h3>
+                        <div class="recette-meta">
+                            <div class="recette-meta-item">
+                                <i class="fas fa-clock"></i>
+                                <span>{{ r.temps }} min</span>
+                            </div>
+                            <div class="recette-meta-item">
+                                <i class="fas fa-fire"></i>
+                                <span>{{ r.calories }} kcal</span>
+                            </div>
+                        </div>
+                        <p class="recette-description">{{ r.ingredients[:80] }}...</p>
+                        <div class="recette-tags">
+                            <span class="tag">Healthy</span>
+                            <span class="tag">{{ r.temps }} min</span>
+                        </div>
+                        <a href="/recette/{{ r.nom }}" class="hidden-link" style="display:none;"></a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="planning-suggestion">
+                <h3>💡 Besoin d'aide pour t'organiser ?</h3>
+                <p>
+                    Sinon, tu veux un <strong>planning de la semaine</strong> pour ton objectif de <strong>{{ objectif }}</strong> ?<br>
+                    Reçois un menu complet avec petit-déjeuner, déjeuner et dîner !
+                </p>
+                <a href="/planning" class="planning-btn">
+                    <i class="fas fa-calendar-week"></i>
+                    Créer mon planning hebdomadaire
+                </a>
+            </div>
+
+            {% else %}
+            <div class="empty-state">
+                <h2>🤷‍♀️ Aucune recette disponible</h2>
+                <p style="margin-bottom: 25px; color: #666;">Complétez votre profil pour recevoir des recommandations personnalisées !</p>
+                <a href="/edit_profile" class="action-btn primary"><i class="fas fa-edit"></i> Compléter mon profil</a>
+            </div>
+            {% endif %}
+
+            <div class="actions-grid">
+                <a href="/profile" class="action-btn secondary"><i class="fas fa-user"></i> Mon profil</a>
+                <a href="/frigo" class="action-btn primary"><i class="fas fa-camera"></i> Scanner mon frigo</a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+    <div class="footer-content">
+        <div class="footer-socials">
+            <a href="https://www.linkedin.com/in/imane-haddag-06b0a433a" target="_blank" class="social-link" aria-label="LinkedIn Imane">
+                <i class="fab fa-linkedin"></i>
+            </a>
+            <a href="https://www.linkedin.com/in/sara-tamani-b0b540290" target="_blank" class="social-link" aria-label="LinkedIn Sara">
+                <i class="fab fa-linkedin"></i>
+            </a>
+            <a href="https://github.com" target="_blank" class="social-link" aria-label="GitHub">
+                <i class="fab fa-github"></i>
+            </a>
+        </div>
+
+        <div class="footer-links">
+            <a href="#" class="footer-link">Mentions Légales</a>
+            <a href="#" class="footer-link">Politique de confidentialité</a>
+            <a href="#" class="footer-link">CGU</a>
+            <a href="/contact" class="footer-link">Contact</a>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2024 AI FitChef - Imane HADDAG & Sara TAMANI. Tous droits réservés.</p>
+        </div>
+    </div>
+</footer>
+</html>

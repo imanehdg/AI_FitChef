@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI FitChef - Mangez sainement, vivez mieux</title>
+    <link rel="stylesheet" href="static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+/* CHATBOT BUTTON */
+.chatbot-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+    z-index: 9998;
+    transition: all 0.3s ease;
+    animation: pulse 2s infinite;
+}
+
+.chatbot-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 12px 35px rgba(16, 185, 129, 0.5);
+}
+
+.chatbot-btn i {
+    color: white;
+    font-size: 1.8rem;
+}
+
+/* LABEL TON CHATBOT */
+.chatbot-label {
+    position: fixed;
+    bottom: 100px;
+    right: 30px;
+    background: white;
+    color: #1f2937;
+    padding: 10px 18px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    z-index: 9997;
+    pointer-events: none;
+}
+
+@keyframes pulse {
+    0%, 100% { box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4); }
+    50% { box-shadow: 0 8px 35px rgba(16, 185, 129, 0.6), 0 0 0 10px rgba(16, 185, 129, 0.1); }
+}
+
+.chatbot-window {
+    position: fixed;
+    bottom: 100px;
+    right: 30px;
+    width: 380px;
+    height: 550px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    display: none;
+    flex-direction: column;
+    z-index: 9999;
+    animation: slideUp 0.4s ease;
+}
+
+.chatbot-window.active {
+    display: flex;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.chatbot-header {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    padding: 20px;
+    border-radius: 20px 20px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chatbot-header-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.chatbot-avatar {
+    font-size: 2rem;
+}
+
+.chatbot-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.chatbot-status {
+    font-size: 0.8rem;
+    opacity: 0.9;
+}
+
+.chatbot-close-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.chatbot-close-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.chatbot-messages {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background: #f9fafb;
+}
+
+.chatbot-message {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.message-avatar {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.message-bubble {
+    background: white;
+    padding: 12px 16px;
+    border-radius: 18px;
+    max-width: 75%;
+    line-height: 1.5;
+    font-size: 0.95rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.user-message {
+    flex-direction: row-reverse;
+}
+
+.user-message .message-bubble {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+}
+
+/* TYPING INDICATOR */
+.typing-indicator {
+    display: none;
+    padding: 0 20px 15px 20px;
+}
+
+.typing-indicator.active {
+    display: flex;
+    gap: 10px;
+}
+
+.typing-dots {
+    display: flex;
+    gap: 5px;
+    padding: 12px 16px;
+    background: white;
+    border-radius: 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.typing-dot {
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+    animation: typing 1.4s infinite;
+}
+
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-10px); }
+}
+
+.chatbot-quick-replies {
+    padding: 10px 20px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    background: white;
+    border-top: 1px solid #e5e7eb;
+}
+
+.quick-reply {
+    background: #f0fdf4;
+    border: 1px solid #10b981;
+    color: #059669;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.quick-reply:hover {
+    background: #10b981;
+    color: white;
+    transform: scale(1.05);
+}
+
+.chatbot-input-container {
+    padding: 20px;
+    background: white;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    gap: 10px;
+    border-radius: 0 0 20px 20px;
+}
+
+.chatbot-input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 25px;
+    font-size: 0.95rem;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.chatbot-input:focus {
+    border-color: #10b981;
+}
+
+.chatbot-send-btn {
+    background: linear-gradient(135deg, #10b981, #059669);
+    border: none;
+    color: white;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.chatbot-send-btn:hover {
+    transform: scale(1.1);
+}
+
+.chatbot-send-btn:active {
+    transform: scale(0.95);
+}
+
+.chatbot-send-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: scale(1);
+}
+
+@media (max-width: 768px) {
+    .chatbot-window {
+        width: calc(100% - 40px);
+        height: calc(100% - 120px);
+        right: 20px;
+        bottom: 90px;
+    }
+    
+    .chatbot-label {
+        bottom: 100px;
+        right: 20px;
+        font-size: 0.85rem;
+        padding: 8px 15px;
+    }
+}
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">
+                <i class="fas fa-leaf"></i>
+                AI FitChef
+            </a>
+            
+            {% if session.username %}
+            <!-- NAVBAR POUR UTILISATEURS CONNECTÉS -->
+            <ul class="navbar-menu">
+                <li class="navbar-item">
+                    <a href="/" class="navbar-link active">
+                        <i class="fas fa-home"></i>
+                        Accueil
+                    </a>
+                </li>
+                <li class="navbar-item">
+                    <a href="/profile" class="navbar-link">
+                        <i class="fas fa-user"></i>
+                        Mon Profil
+                    </a>
+                </li>
+                <li class="navbar-item">
+                    <a href="/recettes" class="navbar-link">
+                        <i class="fas fa-utensils"></i>
+                        Recettes
+                    </a>
+                </li>
+                <li class="navbar-item">
+                    <a href="/planning" class="navbar-link">
+                        <i class="fas fa-calendar-alt"></i>
+                        Planning
+                    </a>
+                </li>
+                <li class="navbar-item">
+                    <a href="/motivation" class="navbar-link">
+                        <i class="fas fa-fire"></i>
+                        Motivation
+                    </a>
+                </li>
+                <li class="navbar-item">
+                    <a href="/frigo" class="navbar-link">
+                        <i class="fas fa-camera"></i>
+                        Mon Frigo
+                    </a>
+                </li>
+                 <li class="navbar-item"><a href="/contact" class="navbar-link"><i class="fas fa-envelope"></i> Contact</a></li>
+                <li class="navbar-item">
+                    <a href="/logout" class="navbar-link">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Déconnexion
+                    </a>
+                </li>
+              
+            </ul>
+            {% else %}
+            <!-- NAVBAR POUR VISITEURS NON CONNECTÉS -->
+            <ul class="navbar-menu">
+                <li class="navbar-item">
+                    <a href="/" class="navbar-link active">
+                        <i class="fas fa-home"></i>
+                        Accueil
+                    </a>
+                </li>
+                <li class="navbar-item">
+                    <a href="/login" class="navbar-link">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Connexion
+                    </a>
+                </li>
+                <li class="navbar-item">
+                    <a href="/register" class="navbar-link">
+                        <i class="fas fa-user-plus"></i>
+                        Inscription
+                    </a>
+                </li>
+            </ul>
+            {% endif %}
+        </div>
+    </nav>
+
+    <section class="hero-banner">
+        <h1>Mangez sainement, vivez mieux.</h1>
+        <p>Votre chef IA est là !</p>
+    </section>
+
+    <main class="main-container">
+        <section class="content-section">
+            <div class="section-header">
+                <h2>
+                    <i class="fas fa-seedling" style="color: var(--primary);"></i>
+                    Découvrez nos recettes personnalisées
+                </h2>
+            </div>
+
+            <div class="recipes-showcase">
+                <div class="recipe-circle" onclick="window.location.href='/recettes'">
+                    <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=400&fit=crop" 
+                         alt="Salade Énergisante" 
+                         class="recipe-circle-image">
+                    <h3>Salade Énergisante</h3>
+                </div>
+
+                <div class="recipe-circle" onclick="window.location.href='/recettes'">
+                    <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=400&fit=crop" 
+                         alt="Wok Rapide" 
+                         class="recipe-circle-image">
+                    <h3>Wok Rapide</h3>
+                </div>
+
+                <div class="recipe-circle" onclick="window.location.href='/recettes'">
+                    <img src="https://menu-vegetarien.com/wp-content/uploads/2021/04/15-recettes-pizza-vegetariennes.jpg" 
+                         alt="pizza végétarienne" 
+                         class="recipe-circle-image">
+                    <h3>pizza végétarienne</h3>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 40px;">
+                <a href="/register" class="btn btn-large">
+                    <i class="fas fa-rocket"></i>
+                    Commencer ma personnalisation
+                </a>
+            </div>
+        </section>
+
+        <div style="text-align: center; margin: 50px 0;">
+            <a href="/motivation" class="btn btn-large" style="background: linear-gradient(135deg, #8b5cf6, #ec4899); border: none;">
+                <i class="fas fa-fire"></i>
+                Découvrir plus de motivation
+            </a>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="/contact" style="color: var(--primary); text-decoration: none; font-weight: 600; font-size: 1.1rem; margin-right: 20px;">
+                Lire plus →
+            </a>
+            <a href="/contact" class="btn btn-secondary">
+                <i class="fas fa-envelope"></i>
+                Contactez-nous
+            </a>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-socials">
+                <a href="https://www.linkedin.com/in/imane-haddag-06b0a433a" target="_blank" class="social-link" aria-label="LinkedIn Imane">
+                    <i class="fab fa-linkedin"></i>
+                </a>
+                <a href="https://www.linkedin.com/in/sara-tamani-b0b540290" target="_blank" class="social-link" aria-label="LinkedIn Sara">
+                    <i class="fab fa-linkedin"></i>
+                </a>
+                <a href="https://github.com" target="_blank" class="social-link" aria-label="GitHub">
+                    <i class="fab fa-github"></i>
+                </a>
+            </div>
+
+            <div class="footer-links">
+                <a href="#" class="footer-link">Mentions Légales</a>
+                <a href="#" class="footer-link">Politique de confidentialité</a>
+                <a href="#" class="footer-link">CGU</a>
+                <a href="/contact" class="footer-link">Contact</a>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2024 AI FitChef - Imane HADDAG & Sara TAMANI. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- LABEL TON CHATBOT -->
+    <div class="chatbot-label">🤖 Ton FitChef IA</div>
+
+    <!-- CHATBOT IA -->
+    <div id="chatbot-button" class="chatbot-btn">
+        <i class="fas fa-robot"></i>
+    </div>
+
+    <div id="chatbot-window" class="chatbot-window">
+        <div class="chatbot-header">
+            <div class="chatbot-header-info">
+                <div class="chatbot-avatar">🤖</div>
+                <div>
+                    <h3>FitChef IA</h3>
+                    <span class="chatbot-status">● En ligne</span>
+                </div>
+            </div>
+            <button id="chatbot-close" class="chatbot-close-btn">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="chatbot-messages" id="chatbot-messages">
+            <div class="chatbot-message bot-message">
+                <div class="message-avatar">🤖</div>
+                <div class="message-bubble">
+                    Salut ! Je suis ton FitChef IA ! 👋<br><br>
+                    Je peux répondre à <strong>toutes tes questions</strong> sur :<br>
+                    • La nutrition et l'alimentation 🥗<br>
+                    • Des idées de recettes saines 🍽️<br>
+                    • Tes objectifs fitness 💪<br>
+                    • Des conseils personnalisés 🎯<br><br>
+                    Pose-moi n'importe quelle question !
+                </div>
+            </div>
+        </div>
+
+        <!-- INDICATEUR DE TYPING -->
+        <div class="typing-indicator" id="typing-indicator">
+            <div class="message-avatar">🤖</div>
+            <div class="typing-dots">
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+            </div>
+        </div>
+        
+        <div class="chatbot-quick-replies">
+            <button class="quick-reply" onclick="sendQuickReply('Conseils nutrition')">
+                💡 Conseils nutrition
+            </button>
+            <button class="quick-reply" onclick="sendQuickReply('Idées recettes')">
+                🍽️ Idées recettes
+            </button>
+            <button class="quick-reply" onclick="sendQuickReply('Mon objectif')">
+                🎯 Mon objectif
+            </button>
+        </div>
+        
+        <div class="chatbot-input-container">
+            <input type="text" id="chatbot-input" class="chatbot-input" placeholder="Pose-moi une question...">
+            <button id="chatbot-send" class="chatbot-send-btn">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- SCRIPT CHATBOT CORRIGÉ -->
+    <script>
+const chatbotBtn = document.getElementById('chatbot-button');
+const chatbotWindow = document.getElementById('chatbot-window');
+const chatbotClose = document.getElementById('chatbot-close');
+const chatbotInput = document.getElementById('chatbot-input');
+const chatbotSend = document.getElementById('chatbot-send');
+const chatbotMessages = document.getElementById('chatbot-messages');
+const typingIndicator = document.getElementById('typing-indicator');
+
+// Ouvrir/Fermer le chatbot
+chatbotBtn.addEventListener('click', () => {
+    chatbotWindow.classList.toggle('active');
+    if (chatbotWindow.classList.contains('active')) {
+        chatbotInput.focus();
+    }
+});
+
+chatbotClose.addEventListener('click', () => {
+    chatbotWindow.classList.remove('active');
+});
+
+// Fonction pour envoyer un message avec ton API Flask/Groq
+async function sendMessage() {
+    const message = chatbotInput.value.trim();
+    if (!message) return;
+    
+    // Désactiver l'input pendant le traitement
+    chatbotInput.disabled = true;
+    chatbotSend.disabled = true;
+    
+    // Ajouter le message de l'utilisateur
+    addMessage(message, 'user');
+    chatbotInput.value = '';
+    
+    // Afficher l'indicateur de typing
+    typingIndicator.classList.add('active');
+    chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+    
+    try {
+        console.log('📤 Envoi du message:', message);
+        
+        // Appel à TON API Flask avec Groq
+        const response = await fetch("/api/chatbot", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                message: message
+            })
+        });
+
+        console.log('📥 Réponse reçue:', response.status);
+        
+        const data = await response.json();
+        
+        // Masquer l'indicateur de typing
+        typingIndicator.classList.remove('active');
+        
+        if (data.success && data.response) {
+            console.log('✅ Réponse du bot:', data.response);
+            addMessage(data.response, 'bot');
+        } else {
+            console.error('❌ Erreur dans la réponse:', data);
+            addMessage("Désolé, je n'ai pas pu traiter ta demande. Peux-tu réessayer ? 😊", 'bot');
+        }
+    } catch (error) {
+        console.error('❌ Erreur réseau:', error);
+        typingIndicator.classList.remove('active');
+        addMessage("Oups ! Une erreur s'est produite. Peux-tu réessayer ? 🤔", 'bot');
+    }
+    
+    // Réactiver l'input
+    chatbotInput.disabled = false;
+    chatbotSend.disabled = false;
+    chatbotInput.focus();
+}
+
+// Event listeners
+chatbotSend.addEventListener('click', sendMessage);
+
+chatbotInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+    }
+});
+
+// Quick replies
+function sendQuickReply(text) {
+    chatbotInput.value = text;
+    sendMessage();
+}
+
+// Fonction pour ajouter un message
+function addMessage(text, sender) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `chatbot-message ${sender === 'user' ? 'user-message' : 'bot-message'}`;
+    
+    // Convertir les retours à la ligne en <br> pour l'affichage
+    const formattedText = text.replace(/\n/g, '<br>');
+    
+    messageDiv.innerHTML = `
+        <div class="message-avatar">${sender === 'user' ? '👤' : '🤖'}</div>
+        <div class="message-bubble">${formattedText}</div>
+    `;
+    
+    chatbotMessages.appendChild(messageDiv);
+    
+    // Scroll automatique vers le bas avec animation fluide
+    setTimeout(() => {
+        chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+    }, 100);
+}
+
+// Message de bienvenue personnalisé au chargement
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Chatbot FitChef chargé et prêt !');
+});
+    </script>
+</body>
+</html>

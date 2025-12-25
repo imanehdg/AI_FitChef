@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frigo intelligent - AI FitChef</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { display: flex; flex-direction: column; min-height: 100vh; }
+        main { flex: 1; padding: 40px 20px; }
+        .frigo-container { max-width: 1400px; margin: 0 auto; animation: fadeIn 0.5s ease; }
+        
+        .header { text-align: center; margin-bottom: 50px; }
+        .header h1 { font-size: 2.5rem; color: var(--dark); margin-bottom: 10px; font-weight: 700; }
+        .header p { color: var(--gray); font-size: 1.1rem; line-height: 1.6; }
+        
+        .two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: start;
+            margin-bottom: 40px;
+        }
+        
+        .image-column {
+            position: sticky;
+            top: 100px;
+        }
+        .hero-image-wrapper img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+            transition: all 0.3s ease;
+        }
+        .hero-image-wrapper img:hover {
+            transform: scale(1.02);
+            box-shadow: 0 25px 70px rgba(0,0,0,0.3);
+        }
+        
+        .upload-card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 30px; }
+        .upload-zone { border: 3px dashed #d1d5db; border-radius: 16px; padding: 50px 25px; text-align: center; background: #f9fafb; transition: all 0.3s ease; cursor: pointer; }
+        .upload-zone:hover { border-color: var(--primary); background: #f0fdf4; }
+        .upload-icon { font-size: 4rem; margin-bottom: 15px; }
+        .upload-zone h3 { color: var(--primary); margin-bottom: 10px; font-size: 1.2rem; font-weight: 700; }
+        .upload-zone p { color: var(--gray); margin: 0 0 20px 0; font-size: 0.95rem; }
+        .custom-file-upload { display: inline-block; padding: 14px 30px; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; border-radius: 12px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
+        .custom-file-upload:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4); }
+        #file-name { margin-top: 15px; color: #059669; font-weight: 600; font-size: 0.95rem; text-align: center; display: none; }
+        #preview-image { max-width: 100%; max-height: 300px; margin-top: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none; }
+        .btn-submit { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; border: none; border-radius: 12px; font-size: 1.05rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; margin-top: 25px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); opacity: 0.5; }
+        .btn-submit:not(:disabled) { opacity: 1; cursor: pointer; }
+        .btn-submit:not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4); }
+        .tips-card { background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(245, 158, 11, 0.1) 100%); padding: 25px; border-radius: 16px; border-left: 5px solid var(--primary); }
+        .tips-card h3 { color: #059669; margin-bottom: 12px; font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .tips-card ul { margin: 0; padding-left: 25px; color: var(--gray); line-height: 1.8; font-size: 0.95rem; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        @media (max-width: 1024px) {
+            .two-columns { grid-template-columns: 1fr; gap: 30px; }
+            .image-column { position: relative; top: 0; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand"><i class="fas fa-leaf"></i> AI FitChef</a>
+            <ul class="navbar-menu">
+                <li class="navbar-item"><a href="/" class="navbar-link"><i class="fas fa-home"></i> Accueil</a></li>
+                <li class="navbar-item"><a href="/profile" class="navbar-link"><i class="fas fa-user"></i> Mon Profil</a></li>
+                <li class="navbar-item"><a href="/recettes" class="navbar-link"><i class="fas fa-utensils"></i> Recettes</a></li>
+                <li class="navbar-item"><a href="/planning" class="navbar-link"><i class="fas fa-calendar-alt"></i> Planning</a></li>
+                <li class="navbar-item"><a href="/motivation" class="navbar-link"><i class="fas fa-fire"></i> Motivation</a></li>
+                <li class="navbar-item"><a href="/frigo" class="navbar-link active"><i class="fas fa-camera"></i> Mon Frigo</a></li>
+                <li class="navbar-item"><a href="/contact" class="navbar-link"><i class="fas fa-envelope"></i> Contact</a></li>
+                <li class="navbar-item"><a href="/logout" class="navbar-link"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <div class="frigo-container">
+            <div class="header">
+                <h1>📸 Frigo Intelligent</h1>
+                <p>Prenez une photo de votre frigo et notre IA vous proposera des recettes adaptées !</p>
+            </div>
+
+            <div class="two-columns">
+                <div class="image-column">
+                    <div class="hero-image-wrapper">
+                        <img src="/static/uploads/frigo-ai.jpg.png" alt="AI FitChef - Frigo Intelligent avec reconnaissance d'aliments">
+                    </div>
+                </div>
+
+                <div class="form-column">
+                    <div class="upload-card">
+                        <form method="POST" action="/frigo" enctype="multipart/form-data" id="upload-form">
+                            <!-- Zone cliquable -->
+                            <div class="upload-zone" id="upload-zone">
+                                <div class="upload-icon">🖼️</div>
+                                <h3>Cliquez pour sélectionner une photo</h3>
+                                <p>Formats acceptés : JPG, PNG, JPEG</p>
+                                
+                                <!-- Input file caché -->
+                                <input type="file" id="file-input" name="image" accept="image/*" required style="display:none;">
+                                
+                                <!-- Label comme bouton -->
+                                <label for="file-input" class="custom-file-upload">
+                                    <i class="fas fa-folder-open"></i> Parcourir mes fichiers
+                                </label>
+                            </div>
+                            
+                            <div id="file-name"></div>
+                            <img id="preview-image" alt="Aperçu">
+                            
+                            <button type="submit" id="submit-btn" class="btn-submit" disabled>
+                                <i class="fas fa-robot"></i> Analyser mon frigo
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="tips-card">
+                        <h3><i class="fas fa-lightbulb"></i> Conseils pour une meilleure détection</h3>
+                        <ul>
+                            <li>Utilisez un bon éclairage naturel</li>
+                            <li>Prenez une photo de face et bien centrée</li>
+                            <li>Assurez-vous que les aliments sont bien visibles</li>
+                            <li>Évitez les photos floues ou trop sombres</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-socials">
+                <a href="https://www.linkedin.com/in/imane-haddag-06b0a433a" target="_blank" class="social-link" aria-label="LinkedIn Imane">
+                    <i class="fab fa-linkedin"></i>
+                </a>
+                <a href="https://www.linkedin.com/in/sara-tamani-b0b540290" target="_blank" class="social-link" aria-label="LinkedIn Sara">
+                    <i class="fab fa-linkedin"></i>
+                </a>
+                <a href="https://github.com" target="_blank" class="social-link" aria-label="GitHub">
+                    <i class="fab fa-github"></i>
+                </a>
+            </div>
+
+            <div class="footer-links">
+                <a href="#" class="footer-link">Mentions Légales</a>
+                <a href="#" class="footer-link">Politique de confidentialité</a>
+                <a href="#" class="footer-link">CGU</a>
+                <a href="/contact" class="footer-link">Contact</a>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2024 AI FitChef - Imane HADDAG & Sara TAMANI. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const fileName = document.getElementById('file-name');
+        const previewImage = document.getElementById('preview-image');
+        const submitBtn = document.getElementById('submit-btn');
+        const uploadZone = document.getElementById('upload-zone');
+
+        // Clic sur toute la zone ouvre le sélecteur
+        uploadZone.addEventListener('click', function(e) {
+            // Si on clique sur le label, laisser le comportement par défaut
+            if (e.target.tagName !== 'LABEL' && !e.target.closest('label')) {
+                fileInput.click();
+            }
+        });
+
+        // Quand un fichier est sélectionné
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                fileName.textContent = '✅ Fichier sélectionné : ' + file.name;
+                fileName.style.display = 'block';
+                
+                // Prévisualisation de l'image
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    previewImage.src = event.target.result;
+                    previewImage.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+                
+                // Activer le bouton submit
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Lors de la soumission du formulaire
+        document.getElementById('upload-form').addEventListener('submit', function() {
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyse en cours...';
+            submitBtn.disabled = true;
+        });
+    </script>
+</body>
+</html>

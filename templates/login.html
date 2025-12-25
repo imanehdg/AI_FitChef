@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Se connecter - AI FitChef</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-width: 450px;
+            width: 100%;
+            animation: fadeInUp 0.5s ease;
+        }
+        .login-container h1 {
+            text-align: center;
+            color: var(--dark);
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        .login-container > p {
+            text-align: center;
+            color: var(--gray);
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            color: var(--dark);
+            margin-bottom: 8px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s ease;
+            background: #f9fafb;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            margin-top: 10px;
+        }
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+        .login-footer {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+        .login-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .login-footer a:hover {
+            text-decoration: underline;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">
+                <i class="fas fa-leaf"></i>
+                AI FitChef
+            </a>
+            <ul class="navbar-menu">
+                <li class="navbar-item">
+                    <a href="/" class="navbar-link">
+                        <i class="fas fa-home"></i>
+                        Accueil
+                    </a>
+                </li>
+                <li class="navbar-item">
+                    <a href="/register" class="navbar-link">
+                        <i class="fas fa-user-plus"></i>
+                        Inscription
+                    </a>
+                </li>
+                <li class="navbar-item">
+                    <a href="/login" class="navbar-link active">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Connexion
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- CONTENU PRINCIPAL -->
+    <main>
+        <div class="login-container">
+            <h1>🔐 Connexion</h1>
+            <p>Connectez-vous pour accéder à votre profil</p>
+            
+            <form method="POST" action="/login">
+                <div class="form-group">
+                    <label for="username">👤 Nom d'utilisateur</label>
+                    <input type="text" id="username" name="username" placeholder="Entrez votre nom" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">🔒 Mot de passe</label>
+                    <input type="password" id="password" name="password" placeholder="Entrez votre mot de passe" required>
+                </div>
+                
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-sign-in-alt"></i> Se connecter
+                </button>
+            </form>
+            
+            <div class="login-footer">
+                <p style="color: var(--gray); margin-bottom: 10px;">Pas encore de compte ?</p>
+                <a href="/register">Créer un compte gratuitement →</a>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-socials">
+                <a href="#" class="social-link" aria-label="Facebook">
+                    <i class="fab fa-facebook"></i>
+                </a>
+                <a href="#" class="social-link" aria-label="Twitter">
+                    <i class="fab fa-twitter"></i>
+                </a>
+                <a href="#" class="social-link" aria-label="Instagram">
+                    <i class="fab fa-instagram"></i>
+                </a>
+            </div>
+            <div class="footer-links">
+                <a href="#" class="footer-link">Mentions Légales</a>
+                <a href="#" class="footer-link">Politique de confidentialité</a>
+                <a href="#" class="footer-link">CGU</a>
+                <a href="#" class="footer-link">Contact</a>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 AI FitChef. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

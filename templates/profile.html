@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil - AI FitChef</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { display: flex; flex-direction: column; min-height: 100vh; background: #fef8f3; }
+        main { flex: 1; padding: 40px 20px; }
+        .profile-container { max-width: 1200px; margin: 0 auto; animation: fadeIn 0.5s ease; }
+        
+        .hero-welcome {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        .hero-welcome h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+        }
+        .hero-welcome p {
+            font-size: 1.2rem;
+            color: #666;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .info-card {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+        .info-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+        }
+        .info-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+        .info-label {
+            font-size: 0.9rem;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        .info-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+        
+        .goals-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+        .goal-big-card {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            padding: 50px;
+            border-radius: 25px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 15px 40px rgba(16, 185, 129, 0.3);
+            transition: all 0.3s ease;
+        }
+        .goal-big-card:hover {
+            transform: translateY(-5px);
+        }
+        .goal-big-card.orange {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            box-shadow: 0 15px 40px rgba(245, 158, 11, 0.3);
+        }
+        .goal-big-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        .goal-big-label {
+            font-size: 1rem;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+        }
+        .goal-big-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-transform: capitalize;
+        }
+        
+        .actions-section h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .action-card {
+            background: white;
+            padding: 30px 20px;
+            border-radius: 20px;
+            text-align: center;
+            text-decoration: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+        }
+        .action-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        .action-card.green:hover { border-color: #10b981; }
+        .action-card.blue:hover { border-color: #3b82f6; }
+        .action-card.orange:hover { border-color: #f59e0b; }
+        .action-card.red:hover { border-color: #ef4444; }
+        .action-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+        .action-icon.green { color: #10b981; }
+        .action-icon.blue { color: #3b82f6; }
+        .action-icon.orange { color: #f59e0b; }
+        .action-icon.red { color: #ef4444; }
+        .action-text {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+        
+        .motivation-banner {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(245, 158, 11, 0.15) 100%);
+            padding: 30px 40px;
+            border-radius: 20px;
+            text-align: center;
+            border-left: 5px solid #10b981;
+        }
+        .motivation-banner p {
+            font-size: 1.2rem;
+            color: #059669;
+            font-weight: 600;
+            line-height: 1.6;
+            margin: 0;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 1024px) {
+            .info-grid { grid-template-columns: repeat(2, 1fr); }
+            .actions-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 768px) {
+            .info-grid { grid-template-columns: 1fr; }
+            .goals-row { grid-template-columns: 1fr; }
+            .actions-grid { grid-template-columns: 1fr; }
+            .hero-welcome h1 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand"><i class="fas fa-leaf"></i> AI FitChef</a>
+            <ul class="navbar-menu">
+                <li class="navbar-item"><a href="/" class="navbar-link"><i class="fas fa-home"></i> Accueil</a></li>
+                <li class="navbar-item"><a href="/profile" class="navbar-link active"><i class="fas fa-user"></i> Mon Profil</a></li>
+                <li class="navbar-item"><a href="/recettes" class="navbar-link"><i class="fas fa-utensils"></i> Recettes</a></li>
+                <li class="navbar-item"><a href="/planning" class="navbar-link"><i class="fas fa-calendar-alt"></i> Planning</a></li>
+                <li class="navbar-item"><a href="/motivation" class="navbar-link"><i class="fas fa-fire"></i> Motivation</a></li>
+                <li class="navbar-item"><a href="/frigo" class="navbar-link"><i class="fas fa-camera"></i> Mon Frigo</a></li>
+                <li class="navbar-item"><a href="/contact" class="navbar-link"><i class="fas fa-envelope"></i> Contact</a></li>
+                <li class="navbar-item"><a href="/logout" class="navbar-link"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <main>
+        <div class="profile-container">
+            <div class="hero-welcome">
+                <h1>Bienvenue {{ username }} 👋</h1>
+                <p>Voici votre tableau de bord santé personnalisé</p>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-card">
+                    <span class="info-icon">📏</span>
+                    <div class="info-label">Taille</div>
+                    <div class="info-value">{{ taille }} cm</div>
+                </div>
+                <div class="info-card">
+                    <span class="info-icon">⚖️</span>
+                    <div class="info-label">Poids</div>
+                    <div class="info-value">{{ poids }} kg</div>
+                </div>
+                <div class="info-card">
+                    <span class="info-icon">📊</span>
+                    <div class="info-label">IMC</div>
+                    <div class="info-value">{{ imc }}</div>
+                </div>
+                <div class="info-card">
+                    <span class="info-icon">🔥</span>
+                    <div class="info-label">Calories/jour</div>
+                    <div class="info-value">{{ calories }}</div>
+                </div>
+            </div>
+
+            <div class="goals-row">
+                <div class="goal-big-card">
+                    <div class="goal-big-icon">🎯</div>
+                    <div class="goal-big-label">Votre Objectif</div>
+                    <div class="goal-big-value">{{ objectif }}</div>
+                </div>
+                <div class="goal-big-card orange">
+                    <div class="goal-big-icon">🏃</div>
+                    <div class="goal-big-label">Niveau d'Activité</div>
+                    <div class="goal-big-value">{{ activite }}</div>
+                </div>
+            </div>
+
+            <div class="actions-section">
+                <h2>Actions Rapides</h2>
+                <div class="actions-grid">
+                    <a href="/edit_profile" class="action-card green">
+                        <span class="action-icon green">✏️</span>
+                        <div class="action-text">Modifier profil</div>
+                    </a>
+                    <a href="/recettes" class="action-card blue">
+                        <span class="action-icon blue">🍽️</span>
+                        <div class="action-text">Mes recettes</div>
+                    </a>
+                    <a href="/frigo" class="action-card orange">
+                        <span class="action-icon orange">📸</span>
+                        <div class="action-text">Scanner frigo</div>
+                    </a>
+                    <a href="/logout" class="action-card red">
+                        <span class="action-icon red">🚪</span>
+                        <div class="action-text">Déconnexion</div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="motivation-banner">
+                <p>💪 Continue comme ça ! Chaque petit pas compte vers ton objectif de <strong>{{ objectif }}</strong> !</p>
+            </div>
+        </div>
+    </main>
+
+   <footer class="footer">
+    <div class="footer-content">
+        <div class="footer-socials">
+            <a href="https://www.linkedin.com/in/imane-haddag-06b0a433a" target="_blank" class="social-link" aria-label="LinkedIn Imane">
+                <i class="fab fa-linkedin"></i>
+            </a>
+            <a href="https://www.linkedin.com/in/sara-tamani-b0b540290" target="_blank" class="social-link" aria-label="LinkedIn Sara">
+                <i class="fab fa-linkedin"></i>
+            </a>
+            <a href="https://github.com" target="_blank" class="social-link" aria-label="GitHub">
+                <i class="fab fa-github"></i>
+            </a>
+        </div>
+
+        <div class="footer-links">
+            <a href="#" class="footer-link">Mentions Légales</a>
+            <a href="#" class="footer-link">Politique de confidentialité</a>
+            <a href="#" class="footer-link">CGU</a>
+            <a href="/contact" class="footer-link">Contact</a>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2024 AI FitChef - Imane HADDAG & Sara TAMANI. Tous droits réservés.</p>
+        </div>
+    </div>
+</footer>
+</html>
