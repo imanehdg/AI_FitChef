@@ -12,6 +12,8 @@ from datetime import datetime, timedelta
 import random
 import base64
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, "database", "users.db")
 
 # Configuration Groq
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
@@ -73,16 +75,16 @@ def detect_food_with_ai(image_path):
     """Détecte les ingrédients avec Mistral Pixtral"""
     try:
         print(f"🔍 Analyse de l'image avec Mistral: {image_path}")
-        
+
         # Encoder l'image en base64
         with open(image_path, "rb") as image_file:
             image_data = base64.b64encode(image_file.read()).decode('utf-8')
-        
+
         print("📸 Image encodée, appel à Mistral Pixtral...")
-        
+
         # Créer le client Mistral
         client_mistral = Mistral(api_key="YbBI0kvd38l7REOvDfjZI2ulFKSqwZ70")
-        
+
         # Appel à Mistral Pixtral
         chat_response = client_mistral.chat.complete(
             model="pixtral-12b-2409",
@@ -111,18 +113,18 @@ EXEMPLE: tomate, carotte, poivron, concombre, laitue, jambon"""
                 }
             ]
         )
-        
+
         response = chat_response.choices[0].message.content.strip()
         print(f"🤖 Mistral a répondu: {response}")
-        
+
         # Nettoyer la réponse
         if "aucun" in response.lower():
             return []
-        
+
         # Enlever les explications si présentes
         if ":" in response:
             response = response.split(":")[-1]
-        
+
         # Convertir en liste
         detected = []
         for item in response.split(","):
@@ -130,10 +132,10 @@ EXEMPLE: tomate, carotte, poivron, concombre, laitue, jambon"""
             item = item.replace(".", "").replace("!", "").replace("?", "")
             if item and len(item) > 2:
                 detected.append(item)
-        
+
         print(f"✅ Ingrédients détectés: {detected}")
         return detected
-        
+
     except Exception as e:
         print(f"❌ Erreur Mistral: {e}")
         import traceback
@@ -163,7 +165,7 @@ def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def init_motivation_table():
-    conn = sqlite3.connect("database/users.db")
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute('''
         CREATE TABLE IF NOT EXISTS UserMotivation (
@@ -188,7 +190,7 @@ def init_motivation_table():
 init_motivation_table()
 
 def get_or_create_motivation(username):
-    conn = sqlite3.connect("database/users.db")
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("SELECT * FROM UserMotivation WHERE username=?", (username,))
     motivation = c.fetchone()
@@ -196,8 +198,8 @@ def get_or_create_motivation(username):
         today = datetime.now().date().isoformat()
         challenge = random.choice(CHALLENGES)
         c.execute('''
-            INSERT INTO UserMotivation 
-            (username, streak_count, last_activity_date, current_challenge, 
+            INSERT INTO UserMotivation
+            (username, streak_count, last_activity_date, current_challenge,
              challenge_date, challenge_progress, challenge_completed)
             VALUES (?, 1, ?, ?, ?, 0, 0)
         ''', (username, today, challenge, today))
@@ -208,7 +210,7 @@ def get_or_create_motivation(username):
     return motivation
 
 def update_streak(username):
-    conn = sqlite3.connect("database/users.db")
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("SELECT streak_count, last_activity_date, best_streak FROM UserMotivation WHERE username=?", (username,))
     data = c.fetchone()
@@ -229,7 +231,7 @@ def update_streak(username):
     if streak_count > best_streak:
         best_streak = streak_count
     c.execute('''
-        UPDATE UserMotivation 
+        UPDATE UserMotivation
         SET streak_count=?, last_activity_date=?, best_streak=?, updated_at=?
         WHERE username=?
     ''', (streak_count, today.isoformat(), best_streak, datetime.now().isoformat(), username))
@@ -238,7 +240,7 @@ def update_streak(username):
     return streak_count
 
 def reset_daily_challenge(username):
-    conn = sqlite3.connect("database/users.db")
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("SELECT challenge_date, current_challenge FROM UserMotivation WHERE username=?", (username,))
     data = c.fetchone()
@@ -252,8 +254,8 @@ def reset_daily_challenge(username):
         if last_challenge_date < today:
             new_challenge = random.choice(CHALLENGES)
             c.execute('''
-                UPDATE UserMotivation 
-                SET challenge_completed=0, challenge_progress=0, 
+                UPDATE UserMotivation
+                SET challenge_completed=0, challenge_progress=0,
                     challenge_date=?, current_challenge=?
                 WHERE username=?
             ''', (today.isoformat(), new_challenge, username))
@@ -274,7 +276,7 @@ def register():
         objectif = request.form["objectif"]
         activite = request.form["activite"]
         hashed_password = generate_password_hash(password)
-        conn = sqlite3.connect("database/users.db")
+        conn = sqlite3.connect(DB_PATH)
         c = conn.cursor()
         c.execute("INSERT INTO Users (username, password, taille, poids, objectif, activite) VALUES (?, ?, ?, ?, ?, ?)",
             (username, hashed_password, taille, poids, objectif, activite))
@@ -288,7 +290,7 @@ def login():
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "").strip()
-        conn = sqlite3.connect("database/users.db")
+        conn = sqlite3.connect(DB_PATH)
         c = conn.cursor()
         c.execute("SELECT * FROM Users WHERE username = ?", (username,))
         user = c.fetchone()
@@ -307,7 +309,7 @@ def profile():
     if "username" not in session:
         return redirect("/login")
     username = session["username"]
-    conn = sqlite3.connect("database/users.db")
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("SELECT taille, poids, objectif, activite FROM Users WHERE username=?", (username,))
     user = c.fetchone()
@@ -324,7 +326,7 @@ def recettes():
     if "username" not in session:
         return redirect("/login")
     username = session["username"]
-    conn = sqlite3.connect("database/users.db")
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("SELECT objectif FROM Users WHERE username=?", (username,))
     row = c.fetchone()
@@ -346,7 +348,7 @@ def recettes():
 def recette_detail(nom):
     if "username" not in session:
         return redirect("/login")
-    conn = sqlite3.connect("database/users.db")
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("SELECT nom, ingredients, instructions, temps, calories, photo FROM Recettes WHERE nom=?", (nom,))
     recette = c.fetchone()
@@ -362,7 +364,7 @@ def edit_profile():
     if "username" not in session:
         return redirect("/login")
     username = session["username"]
-    conn = sqlite3.connect("database/users.db")
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     if request.method == "POST":
         taille = float(request.form["taille"])
@@ -384,36 +386,36 @@ def frigo():
     if "username" not in session:
         return redirect("/login")
     username = session["username"]
-    
+
     if request.method == "POST":
         if "image" not in request.files or request.files["image"].filename == "":
             return "Aucun fichier sélectionné", 400
-        
+
         file = request.files["image"]
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             save_path = os.path.join(UPLOAD_FOLDER, filename)
             file.save(save_path)
-            
+
             print(f"📁 Fichier sauvegardé: {save_path}")
-            
+
             # Détection avec IA
             detected = detect_food_with_ai(save_path)
             print(f"✅ Détection finale: {detected}")
-            
+
             # Recherche des recettes correspondantes
-            conn = sqlite3.connect("database/users.db")
+            conn = sqlite3.connect(DB_PATH)
             c = conn.cursor()
-            
+
             # Récupérer toutes les recettes avec temps et calories
             c.execute("SELECT nom, ingredients, instructions, temps, calories FROM Recettes")
             all_recipes = c.fetchall()
-            
+
             matches = []
             for r in all_recipes:
                 nom, ingredients, instructions, temps, calories = r
                 recette_ing = [i.strip().lower() for i in ingredients.split(",")] if ingredients else []
-                
+
                 # Compter les ingrédients détectés
                 count_detected = 0
                 for ing in recette_ing:
@@ -422,9 +424,9 @@ def frigo():
                         if detected_item in ing or ing in detected_item:
                             count_detected += 1
                             break
-                
+
                 missing = len(recette_ing) - count_detected
-                
+
                 # N'ajouter QUE si au moins 1 ingrédient match
                 if count_detected > 0:
                     matches.append({
@@ -437,22 +439,22 @@ def frigo():
                         "match_count": count_detected,
                         "compatible": missing == 0
                     })
-            
+
             # Trier par nombre d'ingrédients matchés (du + au -)
             matches.sort(key=lambda x: (-x["match_count"], x["missing"]))
-            
+
             conn.close()
-            
+
             print(f"🍽️ {len(matches)} recettes trouvées")
-            
-            return render_template("frigo_result.html", 
-                username=username, 
+
+            return render_template("frigo_result.html",
+                username=username,
                 detected=detected if detected else [],
-                recipes=matches, 
+                recipes=matches,
                 image_url="/" + save_path.replace("\\", "/"))
-        
+
         return "Type de fichier non autorisé", 400
-    
+
     return render_template("frigo.html", username=username)
 
 @app.route("/planning")
@@ -460,7 +462,7 @@ def planning():
     if "username" not in session:
         return redirect("/login")
     username = session["username"]
-    conn = sqlite3.connect("database/users.db")
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("SELECT objectif FROM Users WHERE username=?", (username,))
     row = c.fetchone()
@@ -486,7 +488,7 @@ def generate_planning():
         return jsonify({'success': False, 'error': 'Non connecté'}), 401
     try:
         username = session["username"]
-        conn = sqlite3.connect("database/users.db")
+        conn = sqlite3.connect(DB_PATH)
         c = conn.cursor()
         c.execute("SELECT taille, poids, objectif, activite FROM Users WHERE username=?", (username,))
         user = c.fetchone()
@@ -524,7 +526,7 @@ def motivation():
     username = session['username']
     motivation_data = get_or_create_motivation(username)
     reset_daily_challenge(username)
-    conn = sqlite3.connect("database/users.db")
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("SELECT * FROM UserMotivation WHERE username=?", (username,))
     data = c.fetchone()
@@ -549,7 +551,7 @@ def update_progress():
         print(f"📦 Data reçue: {data}")
         progress = min(int(data.get('progress', 0)), 100)
         print(f"📊 Progress: {progress}")
-        conn = sqlite3.connect("database/users.db")
+        conn = sqlite3.connect(DB_PATH)
         c = conn.cursor()
         c.execute("UPDATE UserMotivation SET challenge_progress=? WHERE username=?", (progress, username))
         print(f"✏️ Lignes modifiées: {c.rowcount}")
@@ -580,7 +582,7 @@ def complete_challenge():
     username = session['username']
     print(f"✅ Username: {username}")
     try:
-        conn = sqlite3.connect("database/users.db")
+        conn = sqlite3.connect(DB_PATH)
         c = conn.cursor()
         c.execute("SELECT challenge_completed FROM UserMotivation WHERE username=?", (username,))
         data = c.fetchone()
@@ -612,12 +614,12 @@ def chatbot():
     try:
         data = request.get_json()
         user_message = data.get('message', '').strip()
-        
+
         if not user_message:
             return jsonify({'success': False, 'error': 'Message vide'}), 400
-        
+
         print(f"💬 Message reçu: {user_message}")
-        
+
         chat_completion = client.chat.completions.create(
             messages=[
                 {
@@ -657,15 +659,15 @@ def chatbot():
             temperature=0.8,
             max_tokens=600
         )
-        
+
         bot_response = chat_completion.choices[0].message.content.strip()
         print(f"🤖 Réponse générée: {bot_response[:100]}...")
-        
+
         return jsonify({
             'success': True,
             'response': bot_response
         })
-        
+
     except Exception as e:
         print(f"❌ ERREUR CHATBOT: {e}")
         import traceback
@@ -686,7 +688,7 @@ def contact():
             flash('Tous les champs obligatoires doivent être remplis', 'error')
             return redirect('/contact')
         try:
-            conn = sqlite3.connect("database/users.db")
+            conn = sqlite3.connect(DB_PATH)
             c = conn.cursor()
             c.execute('''CREATE TABLE IF NOT EXISTS ContactMessages (
                 id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, email TEXT NOT NULL,
