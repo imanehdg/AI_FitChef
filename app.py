@@ -83,7 +83,9 @@ def detect_food_with_ai(image_path):
         print("📸 Image encodée, appel à Mistral Pixtral...")
 
         # Créer le client Mistral
-        client_mistral = Mistral(api_key="YbBI0kvd38l7REOvDfjZI2ulFKSqwZ70")
+        client_mistral = Mistral(
+          api_key=os.getenv("MISTRAL_API_KEY")
+        )
 
         # Appel à Mistral Pixtral
         chat_response = client_mistral.chat.complete(
@@ -154,7 +156,11 @@ def detect_food_mock(img_path):
 
 # Flask config
 app = Flask(__name__)
-app.secret_key = "une_clef_secrete_a_changer"
+
+app.secret_key = os.getenv("FLASK_SECRET_KEY")
+
+if not app.secret_key:
+    raise RuntimeError("FLASK_SECRET_KEY manquante")
 
 UPLOAD_FOLDER = os.path.join("static", "uploads")
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
@@ -709,4 +715,4 @@ def logout():
     return redirect("/login")
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)
